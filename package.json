@@ -1,0 +1,31 @@
+{
+  "name": "ppt",
+  "version": "1.0.0",
+  "description": "rock paper scissors online world championship",
+  "main": "index.js",
+  "dependencies": {
+    "b64url": "^1.0.3",
+    "bluebird": "^3.3.4",
+    "body-parser": "^1.15.0",
+    "cookie-parser": "^1.4.1",
+    "express": "^4.13.4",
+    "express-session": "^1.13.0",
+    "jade": "^1.11.0",
+    "moment": "^2.12.0",
+    "mongodb": "^2.1.7",
+    "mongoose": "^4.4.6",
+    "passport": "^0.3.2",
+    "passport-facebook": "^2.1.0",
+    "underscore": "^1.8.3"
+  },
+  "devDependencies": {
+    "mocha": "^2.4.5",
+    "should": "^8.2.2",
+    "supertest": "^1.2.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Pablo Besada",
+  "license": "ISC"
+}

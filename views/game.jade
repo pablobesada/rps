@@ -1,0 +1,58 @@
+div(align="center", id="message_" + doc._id)
+div(align="center", id="game_"+doc._id)= user._id
+    <img id="profile_image"/>
+
+    table(border="1")
+        thead
+            tr
+                td= doc._id
+                td(colspan="2")= doc.p[0]
+                td(colspan="2")= doc.p[1]
+        tbody
+            each hand, idx in doc.h
+                tr
+                    td= doc.hdl[idx]
+                    - var wh = Game.getWinningHand(hand[0], hand[1])
+                    td= wh
+                        a(href='../remove_hand/'+doc._id+'?p='+doc.p[0]+'&hn='+idx) remove
+
+                    td(class= wh==1 ? "winner" : "looser")= hand[0]
+                    td(class= wh==2 ? "winner" : "looser")= hand[1]
+                        td
+                            a(href='../remove_hand/' + doc._id + '?p=' + doc.p[1] + '&hn=' + idx) remove
+
+            tr
+                td= doc.getNextHandToPlay()
+                td(colspan="2")
+                    - var hn = doc.getNextHandToPlay()[0];
+                    if hn >= 0
+                        div: a(href='#', onclick='play("#{doc._id}","#{doc.p[0]}","#{hn}","R")' ) PIEDRA
+                        div: a(href='#', onclick='play("#{doc._id}","#{doc.p[0]}","#{hn}","P")' ) PAPEL
+                        div: a(href='#', onclick='play("#{doc._id}","#{doc.p[0]}","#{hn}","S")' ) TIJERA
+                td(colspan="2")
+                    - var hn = doc.getNextHandToPlay()[1];
+                    if hn >= 0
+                        div: a(href='#', onclick='play("#{doc._id}","#{doc.p[1]}","#{hn}","R")' ) PIEDRA
+                        div: a(href='#', onclick='play("#{doc._id}","#{doc.p[1]}","#{hn}","P")' ) PAPEL
+                        div: a(href='#', onclick='play("#{doc._id}","#{doc.p[1]}","#{hn}","S")' ) TIJERA
+
+div winner: #{doc.w}
+
+script.
+    function play(game_id, player_id, hand_number, hand_value) {
+        $.ajax({
+            url: "/game/play/" + game_id,
+            data: {p: player_id, hn: hand_number, hv: hand_value}
+        })
+        .done(function (json) {
+
+            $.ajax({
+                url: "/game/status/" + game_id,
+            })
+            .done(function (html) {
+                $("#game_" + game_id).html(html);
+                $("#message_"+game_id).html(json.ok + " " + json.error)
+            });
+        });
+    };
+

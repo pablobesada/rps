@@ -1,0 +1,92 @@
+html
+    head
+        script(type="text/javascript",src="/js/jquery-2.2.1.js")
+        script(type="text/javascript",src="/js/underscore-min.js")
+        link(rel="stylesheet",type="text/css",href="/css/style.css")
+        script(type="text/javascript",src="/js/underscore-min.js")
+
+        title!= title
+    body
+        include fb_script.html
+        <img id="profile_image"/>
+        <fb:login-button scope="public_profile,email" onlogin="checkLoginState();">
+        </fb:login-button>
+        <div id="status">
+        </div>
+
+        div(align="center")
+        div.games
+
+
+script.
+    /*
+    $(function () {
+        console.log(new Date());
+        $.ajax({
+            url: '/player/login/#{player_id}',
+        })
+        .done(function (player_id) {
+            console.log("player logued: " + player_id);
+        $.ajax({
+        url: "/game/get_open",
+        data: {p: player_id}
+        })
+            .done(function (json) {
+                console.log("open games:");
+                //$("#open_games").html(html);
+                _(json).each(function (game) {
+            $.ajax({
+        url: "/game/status/" + game._id,
+        })
+            .done(function (html) {
+        $(".games").append(html);
+        });
+        });
+        })
+        })
+        .fail(function (err) {
+            console.log("error: " + err);
+        })
+    });
+    */
+
+    var facebook_connected = function(res) {
+        console.log(new Date());
+        console.log('Welcome!  Fetching your information.... ');
+        FB.api('/me', function (response) {
+            $.ajax({
+                url: "/player/login",
+                data: {signedRequest: res.authResponse.signedRequest, name: response.name, id: response.id, mode: "fb"}
+                })
+            .done(function (player_id) {
+                console.log("player logued: " + player_id);
+                $.ajax({
+                    url: "/game/get_open",
+                    data: {p: player_id}
+                })
+                .done(function (json) {
+                    console.log("open games:");
+                    //$("#open_games").html(html);
+                    _(json).each(function (game) {
+                        $.ajax({
+                        url: "/game/status/" + game._id,
+                        })
+                        .done(function (html) {
+                            $(".games").append(html);
+                        });
+                    });
+                })
+            })
+            .fail(function (err) {
+                console.log("error: " + err);
+            })
+            console.log(response);
+            console.log('Successful login for: ' + response.name);
+            document.getElementById('status').innerHTML =
+                    'Thanks for logging in, ' + response.name + '!';
+        });
+        FB.api('/me/picture?type=normal', function (response) {
+            document.getElementById("profile_image").setAttribute("src", response.data.url);
+        });
+
+    }

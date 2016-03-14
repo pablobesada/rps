@@ -1,0 +1,10 @@
+assert = require('assert');
+var _ = require('underscore');
+require('mongoose');//.set('debug', true);
+var mongoose = require('mongoose');
+var moment = require('moment');
+var utils = require('../utils');
+
+var tournamentSchema = mongoose.Schema({
+    d: String,
+});
