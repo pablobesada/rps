@@ -15,6 +15,7 @@ html
         </div>
 
         div(align="center")
+        div#tournaments
         div.games
 
 
@@ -49,6 +50,7 @@ script.
         })
     });
     */
+    var player_id = null;
 
     var facebook_connected = function(res) {
         console.log(new Date());
@@ -58,14 +60,29 @@ script.
                 url: "/player/login",
                 data: {signedRequest: res.authResponse.signedRequest, name: response.name, id: response.id, mode: "fb"}
                 })
-            .done(function (player_id) {
+            .done(function (player_json) {
+                player_id = player_json.id;
                 console.log("player logued: " + player_id);
+                document.getElementById('status').innerHTML =
+                'Thanks for logging in, ' + response.name + '!';
+
+                $.ajax({
+                    url: "/tournament/get_availables",
+                })
+                .done(function (json) {
+                    //$("#open_games").html(html);
+                    console.log(json)
+                    $("#tournaments").html('');
+                    _(json['tournaments']).each(function (tournament) {
+                        $("#tournaments").append($("<div onclick='registerInTournament(\""+tournament._id+"\")'>" +tournament.name + " " + tournament._id +"</div>"));
+                    });
+                })
+
                 $.ajax({
                     url: "/game/get_open",
                     data: {p: player_id}
                 })
                 .done(function (json) {
-                    console.log("open games:");
                     //$("#open_games").html(html);
                     _(json).each(function (game) {
                         $.ajax({
@@ -80,13 +97,20 @@ script.
             .fail(function (err) {
                 console.log("error: " + err);
             })
-            console.log(response);
-            console.log('Successful login for: ' + response.name);
-            document.getElementById('status').innerHTML =
-                    'Thanks for logging in, ' + response.name + '!';
         });
         FB.api('/me/picture?type=normal', function (response) {
             document.getElementById("profile_image").setAttribute("src", response.data.url);
         });
+
+    }
+
+    function registerInTournament(tournament_id) {
+        $.ajax({
+            url: "/tournament/register/" + tournament_id,
+            data: {p: player_id}
+        })
+        .done(function (json) {
+            console.log(json)
+        })
 
     }

@@ -1,0 +1,153 @@
+<html><head><script type="text/javascript" src="/js/jquery-2.2.1.js"></script><script type="text/javascript" src="/js/underscore-min.js"></script><link rel="stylesheet" type="text/css" href="/css/style.css"/><script type="text/javascript" src="/js/underscore-min.js"></script><title></title></head><body><script>
+    // This is called with the results from from FB.getLoginStatus().
+    function statusChangeCallback(response) {
+        console.log('statusChangeCallback');
+        console.log(response);
+
+        if (response.status === 'connected') {
+            facebook_connected(response);
+        } else if (response.status === 'not_authorized') {
+            document.getElementById('status').innerHTML = 'Please log ' +
+                    'into this app.';
+        } else {
+            // The person is not logged into Facebook, so we're not sure if
+            // they are logged into this app or not.
+            document.getElementById('status').innerHTML = 'Please log ' +
+                    'into Facebook.';
+        }
+    }
+
+    // This function is called when someone finishes with the Login
+    // Button.  See the onlogin handler attached to it in the sample
+    // code below.
+    function checkLoginState() {
+        FB.getLoginStatus(function (response) {
+            statusChangeCallback(response);
+        });
+    }
+
+    window.fbAsyncInit = function () {
+        FB.init({
+            appId: '631725040318711',
+            cookie: true,  // enable cookies to allow the server to access the session
+            xfbml: true,  // parse social plugins on this page
+            version: 'v2.5' // use graph api version 2.5
+        });
+
+
+        FB.getLoginStatus(function (response) {
+            statusChangeCallback(response);
+        });
+
+    };
+
+    // Load the SDK asynchronously
+    (function (d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s);
+        js.id = id;
+        js.src = "//connect.facebook.net/en_US/sdk.js";
+        fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+
+    function facebook_connected() {
+    }
+</script><img id="profile_image"/>
+<fb:login-button scope="public_profile,email" onlogin="checkLoginState();">
+</fb:login-button>
+<div id="status">
+</div><div align="center"></div><div id="tournaments"></div><div class="games"></div></body></html><script>/*
+$(function () {
+    console.log(new Date());
+    $.ajax({
+        url: '/player/login/',
+    })
+    .done(function (player_id) {
+        console.log("player logued: " + player_id);
+    $.ajax({
+    url: "/game/get_open",
+    data: {p: player_id}
+    })
+        .done(function (json) {
+            console.log("open games:");
+            //$("#open_games").html(html);
+            _(json).each(function (game) {
+        $.ajax({
+    url: "/game/status/" + game._id,
+    })
+        .done(function (html) {
+    $(".games").append(html);
+    });
+    });
+    })
+    })
+    .fail(function (err) {
+        console.log("error: " + err);
+    })
+});
+*/
+var player_id = null;
+
+var facebook_connected = function(res) {
+    console.log(new Date());
+    console.log('Welcome!  Fetching your information.... ');
+    FB.api('/me', function (response) {
+        $.ajax({
+            url: "/player/login",
+            data: {signedRequest: res.authResponse.signedRequest, name: response.name, id: response.id, mode: "fb"}
+            })
+        .done(function (player_json) {
+            player_id = player_json.id;
+            console.log("player logued: " + player_id);
+            document.getElementById('status').innerHTML =
+            'Thanks for logging in, ' + response.name + '!';
+
+            $.ajax({
+                url: "/tournament/get_availables",
+            })
+            .done(function (json) {
+                //$("#open_games").html(html);
+                console.log(json)
+                $("#tournaments").html('');
+                _(json['tournaments']).each(function (tournament) {
+                    $("#tournaments").append($("<div onclick='registerInTournament(\""+tournament._id+"\")'>" +tournament.name + " " + tournament._id +"</div>"));
+                });
+            })
+
+            $.ajax({
+                url: "/game/get_open",
+                data: {p: player_id}
+            })
+            .done(function (json) {
+                //$("#open_games").html(html);
+                _(json).each(function (game) {
+                    $.ajax({
+                    url: "/game/status/" + game._id,
+                    })
+                    .done(function (html) {
+                        $(".games").append(html);
+                    });
+                });
+            })
+        })
+        .fail(function (err) {
+            console.log("error: " + err);
+        })
+    });
+    FB.api('/me/picture?type=normal', function (response) {
+        document.getElementById("profile_image").setAttribute("src", response.data.url);
+    });
+
+}
+
+function registerInTournament(tournament_id) {
+    $.ajax({
+        url: "/tournament/register/" + tournament_id,
+        data: {p: player_id}
+    })
+    .done(function (json) {
+        console.log(json)
+    })
+
+}</script>

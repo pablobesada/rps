@@ -3,6 +3,7 @@ var express = require('express')
 
 router.use('/game', require('./game'))
 router.use('/player', require('./player'))
+router.use('/tournament', require('./tournament'))
 
 router.get('/', function (req, res) {
     res.render('index', {player_id: req.query.p});

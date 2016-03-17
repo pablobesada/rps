@@ -2,6 +2,7 @@
 var mongoose = require('mongoose');
 var moment = require('moment');
 var assert = require('assert');
+var Promise = require('bluebird');
 
 console.log("en models/player")
 var playerSchema = mongoose.Schema({
@@ -22,38 +23,38 @@ fb: {id: , img_uri:}
  */
 
 
-playerSchema.statics.findOrCreate = function(mode, id, name, callback) {
-    var query = {};
-    switch (mode) {
-        case "fb":
-            query["fb.id"] = id;
-            break;
-        default:
-            callback();
-            return;
-    }
-    Player.findOne(query, function (err, doc) {
-        assert.equal(err, null);
-        if (doc != null) {
-            callback(null, doc)
-            return;
-        }
-        var newplayer = new Player({
-            name: name,
-            created: moment().utc().format(),
-        })
+playerSchema.statics.findOrCreate = function(mode, id, name) {
+    return new Promise(function (resolve, reject) {
+        var query = {};
         switch (mode) {
             case "fb":
-                newplayer.fb = {id: id};
+                query["fb.id"] = id;
                 break;
+            default:
+                return reject("invalid mode");
         }
-        newplayer.save(function (err, newplayer) {
-                assert.equal(err, null);
-                callback(null, newplayer);
-                return;
-        });
-    })
+        Player.findOne(query)
+            .then(function (doc) {
+                if (doc != null) {
+                    return resolve(doc)
+                }
+                var newplayer = new Player({
+                    name: name,
+                    created: moment().utc().format(),
+                })
+                switch (mode) {
+                    case "fb":
+                        newplayer.fb = {id: id};
+                        break;
+                }
+                newplayer.save()
+                    .then(function (doc) {
+                        return resolve(doc)
+                    })
+            })
+    });
 }
+
 
 var Player = mongoose.model("players", playerSchema)
 module.exports = Player;

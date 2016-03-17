@@ -1,5 +1,5 @@
 {
-  "name": "ppt",
+  "name": "rps",
   "version": "1.0.0",
   "description": "rock paper scissors online world championship",
   "main": "index.js",
@@ -7,6 +7,7 @@
     "b64url": "^1.0.3",
     "bluebird": "^3.3.4",
     "body-parser": "^1.15.0",
+    "chance": "^1.0.1",
     "cookie-parser": "^1.4.1",
     "express": "^4.13.4",
     "express-session": "^1.13.0",

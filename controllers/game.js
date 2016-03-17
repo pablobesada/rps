@@ -11,10 +11,13 @@ var router = express.Router();
 router.get('/create', function(req, res) {
     console.log("en game/create");
     var data = req.query;
-    Game.create(moment(), data.p1, data.p2, data.t_id, data.t_instance, data.t_game_nr, function (err, doc) {
-        res.send(doc._id.toString());
-    })
-
+    Game.create(moment(), data.p1, data.p2, data.t_id, data.t_instance, data.t_game_nr)
+        .then( function (doc) {
+            res.send({ok:true, id:doc._id.toString()});
+        })
+        .catch( function (err) {
+            res.send({ok:false, error: err.message})
+        })
 });
 
 router.get('/status/:id', function(req, res) {

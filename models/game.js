@@ -23,7 +23,8 @@ var gameSchema = mongoose.Schema({
 
 var GAME_HANDS = 3;
 gameSchema.statics.HAND_DEADLINES_PERIODS = moment.duration(10, 'seconds');
-gameSchema.statics.create = function (date, p1_id, p2_id, tournament_id, tournament_instance, tournament_game_number, callback) {
+gameSchema.statics.create = function (date, p1_id, p2_id, tournament_id, tournament_instance, tournament_game_number, options) {
+    if (!options) options = {}
     var game = new Game({
         d: date.utc().format(),
         p: [p1_id, p2_id],
@@ -36,13 +37,13 @@ gameSchema.statics.create = function (date, p1_id, p2_id, tournament_id, tournam
         w: null,
         l: null
     });
-
+    if (options.id) game._id = options.id;
     var d = moment(date);
     for (var k = 0; k < GAME_HANDS; k++) {
         game.hdl.push(d.add(Game.HAND_DEADLINES_PERIODS).utc().format())
         game.h.push([null, null])
     }
-    game.save(callback);
+    return game.save();
 }
 
 gameSchema.post('find', function(result) {

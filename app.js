@@ -9,6 +9,8 @@ app.use(bodyParser.json());
 var router = express.Router();
 var passport = require('passport');
 var mongoose = require('mongoose');
+// set Promise provider to bluebird
+mongoose.Promise = require('bluebird');
 
 String.prototype.toObjectId = function() {
     var ObjectId = (require('mongoose').Types.ObjectId);
@@ -29,16 +31,20 @@ app.locals._ = require("underscore");
 
 var db = mongoose.connection;
 
-app.startServer = function (callback) {
+app.connectToMongo = function(callback) {
     mongoose.connect(app.get('dbUrl'));
     db.once('open', function () {
         console.log('mongoose ready. In ' + app.settings.env + ' mode')
+        if (callback!= null) callback();
+    });
+};
+
+app.startServer = function (callback) {
+    app.connectToMongo(function () {
         app.listen(4000);
         console.log("listening on port 4000")
-        if (callback!= null) {
-            callback()
-        }
-    });
+
+    })
 }
 
 

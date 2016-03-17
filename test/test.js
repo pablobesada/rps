@@ -30,18 +30,23 @@ var testPlayer2 = {
 var testGame = {}
 
 before(function (done) {
-    app.startServer(done);
+    app.connectToMongo(done);
 })
 
+
+require("./tournament")
+
 describe("Player", function () {
-    console.log("en player")
+    console.log("en test de player")
     before(function (done) {
+        console.log("en before de player")
         Player.remove({}, function () {
             done()
         });
     })
 
     it("should create a new player", function (done) {
+        console.log("en testing")
         request(app)
             .get("/player/login")
             .query({
@@ -51,8 +56,9 @@ describe("Player", function () {
                 mode: testPlayer.mode
             })
             .end(function (err, res) {
-                res.text.should.have.lengthOf(24);
-                testPlayer.id = res.text;
+                res.body.should.have.property("ok").and.be.true();
+                res.body.should.have.property("id").and.have.length(24);
+                testPlayer.id = res.body.id;
                 done();
             })
     });
@@ -60,7 +66,11 @@ describe("Player", function () {
     it("should login as Damian Besada (offline)", function (done) {
         request(app)
             .get("/player/login/" + testPlayer.id)
-            .expect(testPlayer.id, done)
+            .end(function (err, res) {
+                res.body.should.have.property("ok").and.be.true();
+                res.body.should.have.property("id").and.equal(testPlayer.id)
+                done()
+            });
     });
 
     it("should login as Damian Besada (using facebook", function (done) {
@@ -73,7 +83,8 @@ describe("Player", function () {
                 mode: testPlayer.mode
             })
             .end(function (err, res) {
-                res.text.should.equal(testPlayer.id)
+                res.body.should.have.property("ok").and.be.true();
+                res.body.should.have.property("id").and.equal(testPlayer.id)
                 done()
             })
     });
@@ -150,8 +161,9 @@ function loginUser(tPlayer, callback) {
             mode: tPlayer.mode
         })
         .end(function (err, res) {
-            res.text.should.have.length(24);
-            tPlayer.id = res.text;
+            res.body.should.have.property("ok").and.be.true();
+            res.body.should.have.property("id").and.have.length(24)
+            tPlayer.id = res.body.id;
             tPlayer.agent = user;
             callback(err, user)
         })
